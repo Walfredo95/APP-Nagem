@@ -83,7 +83,7 @@ function menuInicial()
                     tipo_cadastro = $("#tipo_cadastro :selected").val();
 
                     if (tipo_cadastro == "cliente") {
-                        $("#container_cadastro").html('<form action="/app/_action/send_cadastro_cliente.php" method="POST"> <div class="row"> <div class="input-field col s6"> <input type="text" name="nome" id="nome"> <label for="nome">NOME</label> </div> <div class="input-field col s6"> <input type="text" name="CNPJ" id="CNPJ"> <label for="cnpj">CNPJ</label> </div> </div> <div class="row"> <div class="input-field col s3"> <input required type="text" name="cep" id="cep"> <label for="cep">CEP</label> </div> <div class="input-field col s5"> <input readonly type="text" name="endereco" id="endereco"> <label class="active" for="endereco">Endereço</label> </div> <div class="input-field col s4"> <input readonly type="text" name="bairro" id="bairro"> <label class="active" for="bairro">Bairro</label> </div> </div> <div class="row"> <div class="input-field col s3"> <input required type="text" name="numero" id="numero"> <label for="numero">Número</label> </div> <div class="input-field col s6"> <input readonly type="text" name="cidade" id="cidade"> <label class="active for="cidade">Cidade</label> </div> <div class="input-field col s3"> <input readonly type="text" name="estado" id="estado"> <label class="active" for="estado">Estado</label> </div> </div> <div class="row"> <div class="input-field col s6 offset-s3"> <select required name="Status" id="Status"> <option value="1">Ativo</option> <option value="0">Inativo</option> </select> <label for="status">Status</label> </div> </div> <div align="center"><button type="submit" class="btn btn-light waves-effect">Enviar</button></div></form>')
+                        $("#container_cadastro").html('<form action="/app/_action/send_cadastro_cliente.php" method="POST"> <div class="row"> <div class="input-field col s6"> <input type="text" name="nome" id="nome"> <label for="nome">NOME</label> </div> <div class="input-field col s6"> <input type="text" name="CNPJ" id="CNPJ"> <label for="cnpj">CNPJ</label> </div> </div> <div class="row"> <div class="input-field col s3"> <input required type="text" name="cep" id="cep"> <label for="cep">CEP</label> </div> <div class="input-field col s5"> <input readonly type="text" name="endereco" id="endereco"> <label class="active" for="endereco">Endereço</label> </div> <div class="input-field col s4"> <input readonly type="text" name="bairro" id="bairro"> <label class="active" for="bairro">Bairro</label> </div> </div> <div class="row"> <div class="input-field col s3"> <input required type="text" name="numero" id="numero"> <label for="numero">Número</label> </div> <div class="input-field col s6"> <input readonly type="text" name="cidade" id="cidade"> <label class="active" for="cidade">Cidade</label> </div> <div class="input-field col s3"> <input readonly type="text" name="estado" id="estado"> <label class="active" for="estado">Estado</label> </div> </div> <div class="row"> <div class="input-field col s6 offset-s3"> <select required name="Status" id="Status"> <option value="1">Ativo</option> <option value="0">Inativo</option> </select> <label for="status">Status</label> </div> </div> <div align="center"><button type="submit" class="btn btn-light waves-effect">Enviar</button></div></form>')
                         $("#CNPJ").mask("99.999.999/9999-99");
                         $("#cep").mask("99999-999");
 
@@ -156,6 +156,115 @@ function menuInicial()
 
     function menuEditar()
     {
+        ?>
+        <div class="container">
+                <div class="card-panel">
+                    <div class="row">   
+                        <div class="input-field col s3">
+                            <select name="tipo_edit" id="tipo_edit">
+                                <option selected disabled value="">Selecione uma opção...</option>
+                                <option value="cliente">Cliente</option>
+                                <option value="contato">Contato</option>
+                            </select>
+                            <label for="tipo_edit">TIPO DE EXCLUSÃO</label>
+                        </div>
+                    </div>
+                    <div id="container_edit">
+                    </div>
+                </div>
+            </div>
+            <script>
+                $(document).ready(function() {
+                    $('select').formSelect();
+                });
+
+                $("#tipo_edit").on("change", function() {
+                    tipo_edit = $("#tipo_edit :selected").val();
+
+                    if (tipo_edit == "cliente") {
+                        $("#container_edit").html('<form action="/app/_action/send_update_cliente.php" method="POST"> <div class="row"> <div class="input-field col s6"> <select required name="cliente" id="cliente"> <option selected disabled value="">Selecione um cliente...</option> <?php require_once __DIR__."/../../connections/db_connect.php"; $sql = "SELECT * FROM tbl_clientes ORDER BY nome"; $result_sql = mysqli_query($conn, $sql); while($row = mysqli_fetch_assoc($result_sql)){ ?> <option value="<?php echo $row["id"] ?>"><?php echo $row["nome"] ?></option> <?php } ?> </select> <label for="cliente">Cliente</label> </div> </div><div id="campos_edit"></div> <div align="center"> <button type="submit" class="btn btn-light waves-effect">Atualizar</button> </div> </form>')
+                        
+                        $('select').formSelect();
+
+                        $("#cliente").on("change", function(){
+                            $.ajax({
+                                url: "/app/_action/campos_update.php",
+                                method: "POST",
+                                data: {
+                                    tipo: "cliente",
+                                    cliente: $("#cliente :selected").val()
+                                },
+
+                                success: function(data) {
+                                    $("#campos_edit").html(data)
+                                    $('select').formSelect();
+
+                                    $("#CNPJ").mask("99.999.999/9999-99");
+                                    $("#cep").mask("99999-999");
+
+                                    $("#cep").on("change", function() {
+                                        var lengh = $("#cep").val().length
+
+                                        console.log(lengh)
+
+                                        if (lengh == 9) {
+                                            $.ajax({
+                                                url: "/app/_action/consulta_cep.php",
+                                                method: "POST",
+                                                data: {
+                                                    cep: $("#cep").val()
+                                                },
+
+                                                success: function(data) {
+                                                    var result_cep = JSON.parse(data)
+                                                    if (result_cep["erro"] == true) {
+                                                        $("#cep").val("")
+                                                        M.toast({
+                                                            html: "<strong class='red-text'>CEP Inválido</strong>"
+                                                        })
+                                                    } else {
+                                                        $("#endereco").val(result_cep["logradouro"])
+                                                        $("#bairro").val(result_cep["bairro"])
+                                                        $("#cidade").val(result_cep["localidade"])
+                                                        $("#estado").val(result_cep["uf"])
+                                                        console.log(result_cep)
+
+                                                    }
+                                                },
+                                            })
+                                        } else {
+                                            $("#cep").val("")
+                                            M.toast({
+                                                html: "<strong class='red-text'>CEP Inválido</strong>"
+                                            })
+                                        }
+                                    });
+
+                                },
+                            })
+                        })
+
+
+                    } else if (tipo_edit == "contato") {
+                        $("#container_edit").html('<form action="/app/_action/send_update_contato.php" method="POST"> <div class="row"> <div class="input-field col s6"> <select required name="cliente_contato" id="cliente_contato"> <option selected disabled value="">Selecione um cliente...</option> <?php require_once __DIR__ . "/../../connections/db_connect.php"; $sql = "SELECT * FROM tbl_clientes ORDER BY nome"; $result_sql = mysqli_query($conn, $sql); while ($row = mysqli_fetch_assoc($result_sql)) { ?> <option value="<?php echo $row["id"] ?>"><?php echo $row["nome"] ?></option> <?php } ?> </select> <label for="cliente_contato">Cliente</label> </div> <div id="listagem_cliente" class="input-field col s6"></div></div> <div align="center"> <button type="submit" class="btn btn-light waves-effect">Atualizar</button> </div> </form>')
+                        $('select').formSelect();
+                        $("#cliente_contato").on("change", function() {
+                            $.ajax({
+                                url: "/app/_action/consulta_contato_cliente.php",
+                                method: "POST",
+                                data: {
+                                    cliente_contato: $("#cliente_contato :selected").val()
+                                },
+
+                                success: function(data) {
+                                    $("#listagem_cliente").html(data)
+                                    $('select').formSelect();
+                                },
+                            })
+                        });
+                    }
+                })
+                <?php
     }
 
     function menuDeletar()
@@ -177,6 +286,7 @@ function menuInicial()
                     </div>
                 </div>
             </div>
+
             <script>
                 $(document).ready(function() {
                     $('select').formSelect();

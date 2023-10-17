@@ -87,8 +87,6 @@ $sql = "INSERT INTO tbl_contatos (id_cliente, nome_contato, email_contato, telef
 if (mysqli_query($conn, $sql)) {
     $_SESSION["mensagem"] = "<strong class='green-text'>Cliente cadastrado com sucesso</strong>";
 } else {
-    echo $sql;
-    exit();
     $_SESSION["mensagem"] = "<strong class='red-text'>Ocorreu um erro ao cadastrar o cliente</strong>";
 }
 
