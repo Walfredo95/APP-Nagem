@@ -92,8 +92,6 @@ function menuInicial()
                         $("#cep").on("change", function() {
                             var lengh = $("#cep").val().length
 
-                            console.log(lengh)
-
                             if (lengh == 9) {
                                 $.ajax({
                                     url: "/app/_action/consulta_cep.php",
@@ -114,7 +112,6 @@ function menuInicial()
                                             $("#bairro").val(result_cep["bairro"])
                                             $("#cidade").val(result_cep["localidade"])
                                             $("#estado").val(result_cep["uf"])
-                                            console.log(result_cep)
 
                                         }
                                     },
@@ -166,7 +163,7 @@ function menuInicial()
                                 <option value="cliente">Cliente</option>
                                 <option value="contato">Contato</option>
                             </select>
-                            <label for="tipo_edit">TIPO DE EXCLUSÃO</label>
+                            <label for="tipo_edit">TIPO DE EDIÇÃO</label>
                         </div>
                     </div>
                     <div id="container_edit">
@@ -205,8 +202,6 @@ function menuInicial()
                                     $("#cep").on("change", function() {
                                         var lengh = $("#cep").val().length
 
-                                        console.log(lengh)
-
                                         if (lengh == 9) {
                                             $.ajax({
                                                 url: "/app/_action/consulta_cep.php",
@@ -227,7 +222,6 @@ function menuInicial()
                                                         $("#bairro").val(result_cep["bairro"])
                                                         $("#cidade").val(result_cep["localidade"])
                                                         $("#estado").val(result_cep["uf"])
-                                                        console.log(result_cep)
 
                                                     }
                                                 },
@@ -246,7 +240,7 @@ function menuInicial()
 
 
                     } else if (tipo_edit == "contato") {
-                        $("#container_edit").html('<form action="/app/_action/send_update_contato.php" method="POST"> <div class="row"> <div class="input-field col s6"> <select required name="cliente_contato" id="cliente_contato"> <option selected disabled value="">Selecione um cliente...</option> <?php require_once __DIR__ . "/../../connections/db_connect.php"; $sql = "SELECT * FROM tbl_clientes ORDER BY nome"; $result_sql = mysqli_query($conn, $sql); while ($row = mysqli_fetch_assoc($result_sql)) { ?> <option value="<?php echo $row["id"] ?>"><?php echo $row["nome"] ?></option> <?php } ?> </select> <label for="cliente_contato">Cliente</label> </div> <div id="listagem_cliente" class="input-field col s6"></div></div> <div align="center"> <button type="submit" class="btn btn-light waves-effect">Atualizar</button> </div> </form>')
+                        $("#container_edit").html('<form action="/app/_action/send_update_contato.php" method="POST"> <div class="row"> <div class="input-field col s6"> <select required name="cliente_contato" id="cliente_contato"> <option selected disabled value="">Selecione um cliente...</option> <?php require_once __DIR__ . "/../../connections/db_connect.php"; $sql = "SELECT * FROM tbl_clientes ORDER BY nome"; $result_sql = mysqli_query($conn, $sql); while ($row = mysqli_fetch_assoc($result_sql)) { ?> <option value="<?php echo $row["id"] ?>"><?php echo $row["nome"] ?></option> <?php } ?> </select> <label for="cliente_contato">Cliente</label> </div> <div id="listagem_cliente" class="input-field col s6"></div></div><div id="campos_edit"></div> <div align="center"> <button type="submit" class="btn btn-light waves-effect">Atualizar</button> </div> </form>')
                         $('select').formSelect();
                         $("#cliente_contato").on("change", function() {
                             $.ajax({
@@ -259,6 +253,37 @@ function menuInicial()
                                 success: function(data) {
                                     $("#listagem_cliente").html(data)
                                     $('select').formSelect();
+                                    $("#contato").on("change", function() {
+                                        $.ajax({
+                                            url: "/app/_action/campos_update.php",
+                                            method: "POST",
+                                            data: {
+                                                tipo: "contato",
+                                                contato: $("#contato :selected").val()
+                                            },
+
+                                            success: function(data) {
+                                                $("#campos_edit").html(data)
+                                                $('select').formSelect();
+                                                $('#email_contato').mask("A", {
+                                                    translation: {
+                                                        "A": { pattern: /[\w@\-.+]/, recursive: true }
+                                                    }
+                                                });
+
+                                                $("#cpf_contato").mask('000.000.000-00', {reverse: true});
+
+                                                $('#telefone_contato').mask('(00) 0000-00009');
+                                                $('#telefone_contato').blur(function(event) {
+                                                if($(this).val().length == 15){
+                                                    $(this).mask('(00) 00000-0009');
+                                                } else {
+                                                    $(this).mask('(00) 0000-00009');
+                                                }
+                                                });
+                                            }
+                                        })
+                                    })
                                 },
                             })
                         });
